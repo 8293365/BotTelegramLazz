@@ -2,15 +2,19 @@ package org.example;
 
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import slf4j
+
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws TelegramApiException {
         try {
-            String botToken = "8084141518:AAG1KfsjjV2weofReaBnniG-RUiH-p40EII";
             TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
-            botsApplication.registerBot(botToken, new TelBot());
+            botsApplication.registerBot(TelBot.staticGetBotToken(), new TelBot());
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            e.printStackTrace();//it is not good for maintenance so think of smething in the future
         }
+
+        System.out.println("The ship has sailed");
+
     }
+
+
 }
