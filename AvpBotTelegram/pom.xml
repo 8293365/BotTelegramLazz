@@ -6,6 +6,32 @@
 
     <groupId>org.example</groupId>
     <artifactId>untitled</artifactId>
-    <version>1.0-SNAPSHOT</version>s
+    <version>1.0-SNAPSHOT</version>
+    <properties>
+        <maven.compiler.source>23</maven.compiler.source>
+        <maven.compiler.target>23</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+<dependencies>
+
+    <dependency>
+        <groupId>org.jsoup</groupId>
+        <artifactId>jsoup</artifactId>
+        <version>1.18.3</version> <!-- Latest version -->
+    </dependency>
+
+    <dependency>
+        <groupId>org.telegram</groupId>
+        <artifactId>telegrambots-longpolling</artifactId>
+        <version>8.0.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.telegram</groupId>
+        <artifactId>telegrambots-client</artifactId>
+        <version>8.0.0</version>
+    </dependency>
+
+</dependencies>
 
 </project>

@@ -13,16 +13,22 @@ public class TelBot implements LongPollingSingleThreadUpdateConsumer {
 
     private final static String token = "8084141518:AAG1KfsjjV2weofReaBnniG-RUiH-p40EII";
     private final static String botName ="AccesoVelozPdf_bot";
-    public void Telbot(){return;}
 
-    private TelegramClient telegramClient = new OkHttpTelegramClient(TelBot.staticGetBotToken());
+
+    private TelegramClient telegramClient;
+
+    public TelBot(String botToken){
+        telegramClient = new OkHttpTelegramClient(botToken);
+    }
+    public TelBot(){
+        telegramClient = new OkHttpTelegramClient(TelBot.staticGetBotToken());
+    }
 
     @Override
     public void consume(Update update) {
         // We check if the update has a message and the message has text
         if (update.hasMessage() && update.getMessage().hasText()) {
             // Set variables
-            // what variables? do i write here the response for the bot commands??
             String message_text = update.getMessage().getText();
             long chat_id = update.getMessage().getChatId();
 
