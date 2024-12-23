@@ -1,147 +1,120 @@
 package org.example;
 
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import java.io.IOException;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.By;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.List;
 import java.util.Set;
-/*
-public class WebScraper {
-    //SELENIUM when a page has elements of javascript which cannot be accessed by simply reading the html file
 
-    public static double calculateInstagramScore(String instagramUsername) {
-        String instagramUrl = "https://www.instagram.com/" + instagramUsername + "/";
+public class WebScraper {
+
+    private static final String BASE_URL = "https://www.comunello.com";
+    private static final String PRODUCTS_PAGE_URL = BASE_URL + "/gate/products/cantilever-gate/";
+
+    public static void main(String[] args) {
+        String productName = "CG-348-M20"; // Replace with the desired product name
+        WebDriver driver = new ChromeDriver();
 
         try {
-            // Collegamento alla pagina Instagram con un controllo dello stato della risposta
-            Connection.Response response = Jsoup.connect(instagramUrl)
-                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
-                    .timeout(5000)
-                    .ignoreHttpErrors(true) // Ignorare gli errori HTTP
-                    .execute();
-
-            if (response.statusCode() == 404) {
-                // La pagina non esiste
-                System.out.println("Instagram page not found for user: " + instagramUsername);
-                return 0.5;
+            String pdfLink = findProductPdfLink(driver, productName);
+            if (pdfLink != null) {
+                System.out.println("PDF Link: " + pdfLink);
+            } else {
+                System.out.println("PDF datasheet not found for product: " + productName);
             }
-
-            // Carica il documento HTML solo se la risposta è OK
-            Document doc = response.parse();
-
-            // Verifica se l'account è pubblico o privato
-            Element scriptTag = doc.select("script[type=application/ld+json]").first();
-            if (scriptTag == null) {
-                // Nessun tag JSON trovato, potrebbe indicare un account inesistente
-                return 0;
-            }
-
-            String json = scriptTag.html();
-            boolean isPrivate = json.contains("\"is_private\":true");
-            if (isPrivate) {
-                return 1.0; // Account privato
-            }
-
-            // Estrarre data dell'ultimo post
-            Element postMeta = doc.select("meta[property=og:description]").first();
-            if (postMeta != null) {
-                String content = postMeta.attr("content");
-                // Aggiungi logica per analizzare la data dei post recenti
-                System.out.println("Profile description: " + content);
-                // Verifica la data dei post e assegna il punteggio appropriato
-                // Per ora assegniamo 2.0 per account pubblico
-                return 2.0;
-            }
-
-            return 2.5; // Account pubblico ma senza metadati utili
-        } catch (IOException e) {
-            // Gestione errori di connessione
-            System.out.println("Error accessing Instagram for user: " + instagramUsername);
-            e.printStackTrace();
-            return 0.0; // Assegniamo il punteggio 0 in caso di errore
+        } finally {
+            driver.quit();
         }
-    }*/
-
-
-//this is in fact the code of a web crawler not a scraper, since this
-public class WebScraper {
-    private final HttpClient httpClient;
-    private final Set<String> visitedUrls; // Keep track of visited URLs
-    private final Queue<String> urlQueue;  // Queue for URLs to visit
-    private final int maxDepth;
-
-    public WebScraper(int maxDepth) {
-        this.httpClient = HttpClient.newHttpClient();
-        this.visitedUrls = new HashSet<>();
-        this.urlQueue = new LinkedList<>();
-        this.maxDepth = maxDepth; // Maximum depth for crawling
     }
 
-    public void startCrawling(String startUrl) {
-        urlQueue.add(startUrl);
+    public static String findProductPdfLink(WebDriver driver, String productName) {
+        // Navigate to the main products page
+        driver.get(PRODUCTS_PAGE_URL);
 
-        while (!urlQueue.isEmpty()) {
-            String currentUrl = urlQueue.poll();
-            if (visitedUrls.contains(currentUrl)) {
-                continue; // Skip already visited URLs
+        // Handle the overlay
+        handleOverlay(driver);
+
+        By select = By.cssSelector(".wpb_wrapper a");
+        List<WebElement> productTypes = driver.findElements(select);
+
+        // Use a Set to track unique href attributes and collect unique WebElements
+        Set<String> uniqueHrefs = new HashSet<>();
+        List<String> validUrls = new ArrayList<>();
+
+        // Filter valid URLs and skip unwanted pages
+        for (WebElement element : productTypes) {
+            String href = element.getAttribute("href");
+            String text = element.getText().toLowerCase();
+
+            if (href != null && !text.contains("bullet") && !text.contains("integrator") && uniqueHrefs.add(href)) {
+                validUrls.add(href);
+            } else {
+                System.out.println("Skipping unwanted page: " + (href != null ? href : text));
             }
+        }
 
-            System.out.println("Crawling: " + currentUrl);
-            visitedUrls.add(currentUrl);
-
+        // Navigate to each valid URL
+        for (String url : validUrls) {
             try {
-                String html = fetchHtml(currentUrl);
-                parseAndAddUrls(html, currentUrl);
-            } catch (IOException | InterruptedException e) {
-                System.err.println("Failed to fetch URL: " + currentUrl);
-            }
+                System.out.println("Navigating to: " + url);
+                driver.get(url);
 
-            // Stop crawling if the depth limit is reached
-            if (visitedUrls.size() >= maxDepth) {
-                System.out.println("Reached maximum crawl depth of " + maxDepth);
-                break;
-            }
-        }
+                // Handle overlay if present
+                handleOverlay(driver);
 
-        System.out.println("Crawling complete. Visited " + visitedUrls.size() + " URLs.");
-    }
+                // Look for the product
+                boolean productFound = false;
+                List<WebElement> productLinks = driver.findElements(By.cssSelector("a"));
+                for (WebElement link : productLinks) {
+                    if (link.getText().toLowerCase().contains(productName.toLowerCase())) {
+                        productFound = true;
+                        link.click();
 
-    private String fetchHtml(String url) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .build();
+                        // Ensure the page has loaded
+                        new WebDriverWait(driver, Duration.ofSeconds(2))
+                                .until(ExpectedConditions.urlContains(productName.toLowerCase().replace(".", "-")));
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                        // Look for PDF links
+                        List<WebElement> pdfLinks = driver.findElements(By.cssSelector("a[href$='.pdf']"));
+                        if (!pdfLinks.isEmpty()) {
+                            return pdfLinks.get(0).getAttribute("href");
+                        } else {
+                            System.out.println("PDF link not found on the product page.");
+                            return null;
+                        }
+                    }
+                }
 
-        if (response.statusCode() != 200) {
-            throw new IOException("Failed to fetch URL. HTTP Status: " + response.statusCode());
-        }
-
-        return response.body();
-    }
-
-    private void parseAndAddUrls(String html, String baseUrl) {
-        Document document = Jsoup.parse(html, baseUrl); // Parse HTML with JSoup
-        for (Element link : document.select("a[href]")) {
-            String absUrl = link.absUrl("href");
-            if (!visitedUrls.contains(absUrl) && isValidUrl(absUrl)) {
-                urlQueue.add(absUrl); // Add valid and unvisited URLs to the queue
+                if (!productFound) {
+                    System.out.println("Product \"" + productName + "\" not found on this page.");
+                }
+            } catch (StaleElementReferenceException e) {
+                System.err.println("StaleElementReferenceException encountered. Skipping this URL: " + url);
             }
         }
+
+        System.out.println("Product \"" + productName + "\" not found on the products page.");
+        return null;
     }
 
-    private boolean isValidUrl(String url) {
-        // Basic validation for URLs
-        return url.startsWith("http") && !url.contains("#") && !url.contains("mailto:");
+    public static void handleOverlay(WebDriver driver) {
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
+            WebElement overlay = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("iubenda-cs-banner")));
+            WebElement rejectButton = overlay.findElement(By.cssSelector(".iubenda-cs-reject-btn.iubenda-cs-btn-primary"));
+            rejectButton.click();
+            Thread.sleep(1000); // Wait for the overlay to disappear
+        } catch (Exception e) {
+            System.out.println("No overlay detected or failed to close it: " + e.getMessage());
+        }
     }
 }
-

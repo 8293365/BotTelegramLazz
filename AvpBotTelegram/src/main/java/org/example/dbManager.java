@@ -5,19 +5,26 @@ import java.sql.*;
 public class dbManager {
 
     private static final String URL = "jdbc:mysql://localhost:3306/AvpbotDB";
-    private static final String USER = "root@localhost ";  // Replace with your MySQL username
-    private static final String PASSWORD = "yourPassword"; // Replace with your MySQL password
+    private static final String USER = "root";  // Replace with your MySQL username
+    private static final String PASSWORD = null; // Replace with your MySQL password
     private Connection connection;
 
     public dbManager() {
         try {
-            // Connect to the database
+            // Forcefully load the MySQL JDBC driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            System.out.println("MySQL JDBC Driver loaded successfully.");
+
+            // Establish the connection
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
             System.out.println("Connection established.");
+        } catch (ClassNotFoundException e) {
+            System.err.println("MySQL JDBC Driver not found: " + e.getMessage());
         } catch (SQLException e) {
             System.err.println("Connection failed: " + e.getMessage());
         }
     }
+
 
     // Method to insert a Maker
     public void insertMaker(String nameM) {
