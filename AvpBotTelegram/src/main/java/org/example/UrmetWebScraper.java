@@ -102,7 +102,7 @@ public class UrmetWebScraper {
                             try {
                                 WebElement pdfLinkElement = wait.until(ExpectedConditions.presenceOfElementLocated(
                                         By.cssSelector(".link.link-regular.link-light.txt-underlined")));
-                                return pdfLinkElement.getAttribute("href");
+                                return pdfLinkElement.getDomAttribute("href");
                             } catch (TimeoutException e) {
                                 System.out.println("PDF link not found on the product page.");
                                 return null;

@@ -51,7 +51,7 @@ public class ComunelloWebScraper {
 
         // Filter valid URLs and skip unwanted pages
         for (WebElement element : productTypes) {
-            String href = element.getAttribute("href");
+            String href = element.getDomAttribute("href");
             String text = element.getText().toLowerCase();
 
             if (href != null && !text.contains("bullet") && !text.contains("integrator") && uniqueHrefs.add(href)) {
@@ -85,7 +85,7 @@ public class ComunelloWebScraper {
                         // Look for PDF links
                         List<WebElement> pdfLinks = driver.findElements(By.cssSelector("a[href$='.pdf']"));
                         if (!pdfLinks.isEmpty()) {
-                            return pdfLinks.get(0).getAttribute("href");
+                            return pdfLinks.get(0).getDomAttribute("href");
                         } else {
                             System.out.println("PDF link not found on the product page.");
                             return null;
