@@ -17,25 +17,32 @@ public class Main {
     }
 
 
-}*/
+}
+*/
 package org.example;
 
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
-
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main {
+
+    private static final Logger logger = Logger.getLogger(Main.class.getName());
+
     public static void main(String[] args) {
+        try {
+            // Initialize the Telegram Long Polling Application
+            TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
 
-        try (TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication()) {
-            botsApplication.registerBot(TelBot.staticGetBotToken(), new TelBot());
-            System.out.println("MyAmazingBot successfully started!");
-            Thread.currentThread().join();
-            //do I make a function for each webscraper or do i arrange it in some other way?
-            //the function should just be an empty function call to each of the other Webscraper classes which are selected
-        } catch (Exception e) {
-            e.printStackTrace();
+            // Register the bot using the token and bot instance
+            String botToken = TelBot.staticGetBotToken();
+            botsApplication.registerBot(botToken, new TelBot());
+
+            System.out.println("The ship has sailed.");
+        } catch (TelegramApiException e) {
+            // Log the exception for better maintainability
+            logger.log(Level.SEVERE, "Failed to register the Telegram bot.", e);
         }
-
     }
-
-    }
+}
