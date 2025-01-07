@@ -11,7 +11,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.*;
 
-public class bftWebScraper {
+public class
+bftWebScraper {
     //string controlled by the telegrambotsClass???
     //protected static String PRODUCT_STRING_URL =  "/gate/products/cantilever-gate/";
 
