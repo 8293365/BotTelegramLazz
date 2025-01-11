@@ -33,6 +33,10 @@ bftWebScraper {
      *
      */
 
+    public bftWebScraper(){
+        return;
+    }
+
     public static void main(String[] args) {
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);//beba z-wave driver

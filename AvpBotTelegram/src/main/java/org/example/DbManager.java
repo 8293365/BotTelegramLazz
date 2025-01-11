@@ -2,14 +2,14 @@ package org.example;
 
 import java.sql.*;
 
-public class dbManager {
+public class DbManager {
 
     private static final String URL = "jdbc:mysql://localhost:3306/AvpbotDB";
     private static final String USER = "root";  // Replace with your MySQL username
     private static final String PASSWORD = null; // Replace with your MySQL password
     private Connection connection;
 
-    public dbManager() {
+    public DbManager() {
         try {
             // Forcefully load the MySQL JDBC driver
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -24,6 +24,8 @@ public class dbManager {
             System.err.println("Connection failed: " + e.getMessage());
         }
     }
+
+
 
 
     // Method to insert a Maker
@@ -74,6 +76,25 @@ public class dbManager {
         }
     }
 
+    public void fetchProduct(String ProductCodeOrName){//returns arraylist of row if found else returns null
+        String sqlCode = "SELECT * FROM Products WHERE productCode = ";
+        String sqlNameP = "SELECT * FROM Products WHERE nameP = ";//so I need to make two calls how do i do that??
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sqlCode+ ProductCodeOrName +";")) {
+            /*while (rs.next()) {
+                System.out.println("Product Code: " + rs.getString("productCode"));
+                System.out.println("NameP: " + rs.getString("NameP"));
+                System.out.println("Image: " + rs.getString("image"));
+                System.out.println("Last Update: " + rs.getDate("lastUpdate"));
+                System.out.println("PDF Link: " + rs.getString("pdfLink"));
+                System.out.println("Category: " + rs.getString("category"));
+                System.out.println("---------------------------");
+            }*/
+        } catch (SQLException e) {
+            System.err.println("Error fetching products: " + e.getMessage());
+        }
+    }
+
     // Close the connection
     public void close() {
         try {
@@ -85,15 +106,16 @@ public class dbManager {
             System.err.println("Error closing connection: " + e.getMessage());
         }
     }
-
+    
+    
     public static void main(String[] args) {
-        dbManager dbManager = new dbManager();
+        DbManager DbManager = new DbManager();
 
         // Example usage
-        dbManager.insertMaker("MakerName1");
-        dbManager.insertProduct("ProductName1", "image.png", "P001", "2023-12-23", "link.pdf", "category1");
-        dbManager.fetchProducts();
+        DbManager.insertMaker("MakerName1");
+        DbManager.insertProduct("ProductName1", "image.png", "P001", "2023-12-23", "link.pdf", "category1");
+        DbManager.fetchProducts();
 
-        dbManager.close();
+        DbManager.close();
     }
 }

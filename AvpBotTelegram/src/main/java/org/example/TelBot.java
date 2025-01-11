@@ -623,12 +623,34 @@ public class TelBot implements LongPollingSingleThreadUpdateConsumer {
     private static String userAnswer;
     private static String category;
     private static String seller;
-
+    public static String pdf_productLink;
     // Map to track user states
     private final Map<Long, String> userStates = new HashMap<>();
 
     public TelBot() {
         this.telegramClient = new OkHttpTelegramClient(botToken);
+
+    }
+
+    public interface UserInputListener {
+        void onUserInputReceived(String userAnswer, String category, String seller);
+    }
+
+    private UserInputListener inputListener;
+
+    public void setUserInputListener(UserInputListener listener) {
+        this.inputListener = listener;
+    }
+
+    private void handleUserAnswer(long chatId) {
+        //HERE THERE MUST GO A TRY-CATCH THAT WAITS THE SCRAPER FOR THE RESULT IT CANNOT GO STRAIGHT AWAY
+        //sendMessage(chatId, "You entered: " + pdf_productLink); //this is the final one
+        sendMessage(chatId, "You entered: " + userAnswer);
+        if (inputListener != null) {
+            inputListener.onUserInputReceived(userAnswer, category, seller);
+        }
+        userStates.put(chatId, "MAIN_MENU"); // Reset state after handling input
+        sendMainMenu(chatId); // Return to the main menu
     }
 
     @Override
@@ -642,13 +664,12 @@ public class TelBot implements LongPollingSingleThreadUpdateConsumer {
                 sendMainMenu(chatId);
             } else if ("WAITING_FOR_CATEGORY_SELECTION".equals(userStates.get(chatId))) {
                 userAnswer = messageText; // Save user input
-                sendMessage(chatId, "You entered: " + userAnswer);
-                userStates.put(chatId, "MAIN_MENU"); // Reset state
-                sendMainMenu(chatId);
+                handleUserAnswer(chatId); // Explicit call to handleUserAnswer
             } else {
                 sendEcho(chatId, "Please use the buttons to navigate.");
             }
-        } else if (update.hasCallbackQuery()) {
+        }
+        else if (update.hasCallbackQuery()) {
             String callbackData = update.getCallbackQuery().getData();
             long messageId = update.getCallbackQuery().getMessage().getMessageId();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
@@ -740,12 +761,12 @@ public class TelBot implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-
+    /*
     private void handleUserAnswer(long chatId) {
         sendMessage(chatId, "You entered: " + this.userAnswer);
         userStates.put(chatId, "MAIN_MENU"); // Reset state after handling input
         sendMainMenu(chatId); // Return to the main menu
-    }
+    }*/
 
     private InlineKeyboardMarkup createUrmetCategories() {
         return createInlineKeyboardMarkup(

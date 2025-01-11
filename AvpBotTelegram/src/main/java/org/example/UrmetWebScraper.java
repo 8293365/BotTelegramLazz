@@ -11,11 +11,23 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UrmetWebScraper {
+public class    UrmetWebScraper {
     private static final String BASE_URL = "https://www.urmet.com";
     private static final String CATEGORY_PAGE_URL = "/Telephony";
     private static final String PRODUCTS_PAGE_URL = BASE_URL + "/en-us/Professional/Products"+ CATEGORY_PAGE_URL +"/See-all-the-products";
+    private static final String[] CATEGORIES_URL = {"/Videocitofonia","/Telefonia","/Smart-Home","/Videosorveglianza","/Antintrusione",
+                                                    "/Antincendio","/Controllo-Accessi","/Serie-Civile","/Sistemi-di-distribuzione"};
 
+    public UrmetWebScraper(){
+        return;
+    }
+
+    public String getCategory(int category){
+        return CATEGORIES_URL[category];
+    }
+    public static String staticgetCategory(int category){
+        return CATEGORIES_URL[category];
+    }
     public static void main(String[] args) {
         String productCode = "1375/836"; // Replace with the desired product code
         WebDriver driver = new ChromeDriver(getChromeOptions());
