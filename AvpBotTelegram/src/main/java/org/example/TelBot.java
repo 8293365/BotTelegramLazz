@@ -632,6 +632,14 @@ public class TelBot implements LongPollingSingleThreadUpdateConsumer {
 
     }
 
+    public static String staticGetBotToken() {
+        return botToken;
+    }
+
+    public static String staticGetBotUsername() {
+        return botName;
+    }
+
     public interface UserInputListener {
         void onUserInputReceived(String userAnswer, String category, String seller);
     }
@@ -678,13 +686,6 @@ public class TelBot implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-    public static String staticGetBotToken() {
-        return botToken;
-    }
-
-    public static String staticGetBotUsername() {
-        return botName;
-    }
 
     private void sendMainMenu(long chatId) {
         String text = "Choose a product category:";

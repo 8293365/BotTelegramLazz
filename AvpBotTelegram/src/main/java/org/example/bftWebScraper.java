@@ -37,6 +37,27 @@ bftWebScraper {
         return;
     }
 
+    public String search(String args){
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
+        // Replace with the desired product name
+        WebDriver driver = new ChromeDriver(chromeOptions);
+
+        try {
+            String pdfLink = findProductPdfLink(driver, args.toUpperCase());
+            if (pdfLink != null) {
+                driver.quit();
+                return pdfLink;
+            } else {
+                driver.quit();
+                return ("PDF datasheet not found for product: " + args);
+            }
+        } finally {
+            driver.quit();
+            return null;
+        }
+    }
+
     public static void main(String[] args) {
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);//beba z-wave driver

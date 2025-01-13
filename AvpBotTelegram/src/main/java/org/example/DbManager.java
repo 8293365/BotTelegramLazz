@@ -7,7 +7,7 @@ public class DbManager {
     private static final String URL = "jdbc:mysql://localhost:3306/AvpbotDB";
     private static final String USER = "root";  // Replace with your MySQL username
     private static final String PASSWORD = null; // Replace with your MySQL password
-    private Connection connection;
+    private  Connection connection;
 
     public DbManager() {
         try {
@@ -81,18 +81,15 @@ public class DbManager {
         String sqlNameP = "SELECT * FROM Products WHERE nameP = ";//so I need to make two calls how do i do that??
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sqlCode+ ProductCodeOrName +";")) {
-            /*while (rs.next()) {
-                System.out.println("Product Code: " + rs.getString("productCode"));
-                System.out.println("NameP: " + rs.getString("NameP"));
-                System.out.println("Image: " + rs.getString("image"));
-                System.out.println("Last Update: " + rs.getDate("lastUpdate"));
-                System.out.println("PDF Link: " + rs.getString("pdfLink"));
-                System.out.println("Category: " + rs.getString("category"));
-                System.out.println("---------------------------");
-            }*/
         } catch (SQLException e) {
             System.err.println("Error fetching products: " + e.getMessage());
         }
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sqlNameP+ ProductCodeOrName +";")) {
+        } catch (SQLException e) {
+            System.err.println("Error fetching products: " + e.getMessage());
+        }
+
     }
 
     // Close the connection

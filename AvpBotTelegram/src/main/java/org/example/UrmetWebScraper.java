@@ -22,12 +22,44 @@ public class    UrmetWebScraper {
         return;
     }
 
-    public String getCategory(int category){
-        return CATEGORIES_URL[category];
+
+
+    public String getCategory(String category){
+        for (String s : CATEGORIES_URL) {
+            if (s.equals(category)) {
+                return category;
+            }
+        }
+        return null;
     }
-    public static String staticgetCategory(int category){
-        return CATEGORIES_URL[category];
+
+    public String staticgetCategory(String category){
+        for (String s : CATEGORIES_URL) {
+            if (s.equals(category)) {
+                return category;
+            }
+        }
+        return null;
     }
+    public String search(String category, String args) {
+        // Replace with the desired product code
+        WebDriver driver = new ChromeDriver(getChromeOptions());
+
+        try {
+            String pdfLink = findProductPdfLink(driver, args);
+            if (pdfLink != null) {
+                driver.quit();
+                return pdfLink;
+            } else {
+                driver.quit();
+                return ("PDF datasheet not found for product code: " + args);
+            }
+        } finally {
+            driver.quit();
+            return null;
+        }
+    }
+
     public static void main(String[] args) {
         String productCode = "1375/836"; // Replace with the desired product code
         WebDriver driver = new ChromeDriver(getChromeOptions());
@@ -35,8 +67,10 @@ public class    UrmetWebScraper {
         try {
             String pdfLink = findProductPdfLink(driver, productCode);
             if (pdfLink != null) {
+                driver.quit();
                 System.out.println("PDF Link: " + pdfLink);
             } else {
+                driver.quit();
                 System.out.println("PDF datasheet not found for product code: " + productCode);
             }
         } finally {

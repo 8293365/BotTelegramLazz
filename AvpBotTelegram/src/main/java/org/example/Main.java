@@ -54,6 +54,8 @@ package org.example;
 
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 /*
@@ -118,9 +120,11 @@ public class Main {
 
         static DbManager dbManager = new DbManager();
 
-        public ComunelloWebScraper comunelloScraper = new ComunelloWebScraper();
-        public bftWebScraper bftWebScraper = new bftWebScraper();
-        public UrmetWebScraper urmetScraper = new UrmetWebScraper();
+        public static ComunelloWebScraper comunelloScraper = new ComunelloWebScraper();
+        public static bftWebScraper bftScraper = new bftWebScraper();
+        public static UrmetWebScraper urmetScraper = new UrmetWebScraper();
+        public static final String[] CATEGORIES_URL = {"/Videocitofonia","/Telefonia","/Smart-Home","/Videosorveglianza","/Antintrusione",
+                "/Antincendio","/Controllo-Accessi","/Serie-Civile","/Sistemi-di-distribuzione"};
 
         @Override
         public void onUserInputReceived(String userAnswer, String category, String seller) {
@@ -129,7 +133,7 @@ public class Main {
             System.out.println("Seller: " + seller);
 
 
-            //here we add all of the calls that we need
+            //here we add the function calls that we need
             TelBot.pdf_productLink = getPdf(userAnswer, category, seller);
         }
 
@@ -157,26 +161,23 @@ public class Main {
         }
 
         public static String getPdf(String userAnswer, String category, String seller){
-            String result ="";
-            if (seller == "urmet"){
-                org.example.bftWebScraper.getProductCode(category);
-                bftScraper.getCategory(category);
-                //result = bftScraper.getPdf();
-            } else if (seller == "bft") {
-
-            } else if (seller == "comunello"){}
-
-
-            return result;
+            if (Objects.equals(seller, "urmet")){
+                return urmetScraper.search(urmetScraper.getCategory(category),userAnswer);
+            } else if (Objects.equals(seller, "bft")) {
+                return bftScraper.search(userAnswer);
+            } else if (Objects.equals(seller, "comunello")){
+                return comunelloScraper.search(comunelloScraper.getCategory(category),userAnswer);
+            }
+            return null;
         }
 
-        public static void getScraper(String scraper){//maybe like this
+        public static String getDB{//maybe like this
 
 
         }
 
         public static void pdfSender(){
-            //
+
 
         }
     }

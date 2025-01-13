@@ -9,24 +9,46 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ComunelloWebScraper {
 
     private static final String BASE_URL = "https://www.comunello.com";
     private static final String PRODUCTS_PAGE_URL = BASE_URL + "/gate/products/cantilever-gate/";
-    private static final String[] CATEGORIES_URL = {"/sliding-gate","cantilever-gate","telescopic-gate","swing-gate",
+    public static final String[] CATEGORIES_URL = new String[]{"/sliding-gate","cantilever-gate","telescopic-gate","swing-gate",
         "pedestrian-gate","bifolding-gate","rising-hinges","steel-doors-and-windows","sliding-door","folding-doors"};
 
     public ComunelloWebScraper(){
         return;
     }
 
-    private static String getCategory(int category){
-        return CATEGORIES_URL[category];}
+    public String getCategory(String category){
+
+        for (String s : CATEGORIES_URL) {
+            if (Objects.equals(s, category)) {
+                return category;
+            }
+        }
+        return null;
+    }
+    public String search(String category,String args) {
+        // Replace with the desired product name
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            String pdfLink = findProductPdfLink(driver, args);
+            if (pdfLink != null) {
+                driver.quit();
+                return pdfLink;
+            } else {
+                driver.quit();
+                return ("PDF datasheet not found for product: " + args);
+            }
+        } finally {
+            driver.quit();
+            return null;
+        }
+    }
 
     public static void main(String[] args) {
         String productName = "CG-348-M20"; // Replace with the desired product name
