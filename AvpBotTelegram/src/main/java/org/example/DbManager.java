@@ -1,6 +1,6 @@
 package org.example;
-
 import java.sql.*;
+
 
 public class DbManager {
 
@@ -61,33 +61,74 @@ public class DbManager {
     public void fetchProducts() {
         String sql = "SELECT * FROM Products";
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                System.out.println("Product Code: " + rs.getString("productCode"));
-                System.out.println("NameP: " + rs.getString("NameP"));
-                System.out.println("Image: " + rs.getString("image"));
-                System.out.println("Last Update: " + rs.getDate("lastUpdate"));
-                System.out.println("PDF Link: " + rs.getString("pdfLink"));
-                System.out.println("Category: " + rs.getString("category"));
+             ResultSet resultSet = stmt.executeQuery(sql)) {
+            while (resultSet.next()) {
+                System.out.println("Product Code: " + resultSet.getString("productCode"));
+                System.out.println("NameP: " + resultSet.getString("NameP"));
+                System.out.println("Image: " + resultSet.getString("image"));
+                System.out.println("Last Update: " + resultSet.getDate("lastUpdate"));
+                System.out.println("PDF Link: " + resultSet.getString("pdfLink"));
+                System.out.println("Category: " + resultSet.getString("category"));
                 System.out.println("---------------------------");
             }
         } catch (SQLException e) {
             System.err.println("Error fetching products: " + e.getMessage());
         }
     }
+//toh ora faccio una funzione wrapper per le stramaledette query
+    public String fetchProduct(String ProductCodeOrName) throws SQLException {//returns arraylist of row if found else returns null
+        String[] columns = {"nameP, productCode"};
+        boolean running = true;
+        for (String s : columns) {
+            ResultSet rs = fetch(ProductCodeOrName, s, "*");
+            if (rs != null){
+                boolean upToDate = checkDate(ProductCodeOrName, "lastUpdate");
+                if(!upToDate){ return "2: Product Data outdated";}
 
-    public void fetchProduct(String ProductCodeOrName){//returns arraylist of row if found else returns null
-        String sqlCode = "SELECT * FROM Products WHERE productCode = ";
-        String sqlNameP = "SELECT * FROM Products WHERE nameP = ";//so I need to make two calls how do i do that??
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sqlCode+ ProductCodeOrName +";")) {
+                try {
+                    return rs.getString("pdflink");
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return "empty";
+    }
+
+    protected Boolean checkDate(String ProdName, String column){//returns
+        Statement stmt;
+        try {
+            //manual oracle says " The following code fragment, in which con is a valid Connection object, illustrates how to make a result
+            // set that is scrollable and insensitive to updates by others, and that is updatable. See ResultSet fields for other options."
+            stmt = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
+            stmt.executeQuery("SELECT EXISTS (\n" +
+                    "    SELECT "+ ProdName +" \n" +
+                    "    FROM Products \n" +
+                    "    WHERE DATEDIFF(NOW(),"+column+") > 30\n" +
+                    ") AS is_older_than_30_days;\n");
+            if(stmt.toString().equals("TRUE")){
+                return true;
+            }else if(stmt.toString().equals("FALSE")){
+                return false;
+            }
         } catch (SQLException e) {
             System.err.println("Error fetching products: " + e.getMessage());
         }
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sqlNameP+ ProductCodeOrName +";")) {
+
+    }
+    protected ResultSet fetch(String str, String column, String products){
+        String queryStr = "SELECT "+products+" FROM Products WHERE "+ column + " = ";//so I need to make two calls how do i do that??
+        Statement stmt;
+            try {
+                //manual oracle says " The following code fragment, in which con is a valid Connection object, illustrates how to make a result
+                // set that is scrollable and insensitive to updates by others, and that is updatable. See ResultSet fields for other options."
+            stmt = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
+                return stmt.executeQuery(queryStr + str +";");
         } catch (SQLException e) {
             System.err.println("Error fetching products: " + e.getMessage());
+            return null;
         }
 
     }

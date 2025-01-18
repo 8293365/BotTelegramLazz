@@ -171,9 +171,8 @@ public class Main {
             return null;
         }
 
-        public static String getDB{//maybe like this
-
-
+        public static String getDB(){//maybe like this
+            return "thing";
         }
 
         public static void pdfSender(){
